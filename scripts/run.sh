@@ -1,3 +1,3 @@
 #!/bin/sh
 
-nodemon --delay 1s -e go,html --ignore web/app/ --exec go run ./cmd/ncDocConverth --signal SIGTERM
+./web/app/node_modules/.bin/nodemon --delay 10s -e go,html --ignore web/app/ --signal SIGTERM --exec go run ./cmd/ncDocConverth || exit 1

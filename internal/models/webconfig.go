@@ -2,7 +2,6 @@ package models
 
 import (
 	"flag"
-	"fmt"
 	"os"
 
 	yaml "gopkg.in/yaml.v3"
@@ -27,6 +26,7 @@ type Logging struct {
 	LogFilePath   string `yaml:"logFilePath"`
 }
 
+// Parses the given configuration file (.yaml file) to an WebConfiguration
 func ParseConfig(webConfig *WebConfig, file string) (*WebConfig, error) {
 	if file == "" {
 		return webConfig, nil
@@ -70,7 +70,9 @@ func SetConfig() (*WebConfig, error) {
 	webConfig := getDefaultConfig()
 	webConfig, err := ParseConfig(webConfig, configPath)
 	if err != nil {
-		return nil, fmt.Errorf("unable to parse the configuration file '%s': %s", configPath, err)
+		logger.Error("Unable to parse the configuration file '%s': %s", configPath, err)
+		webConfig = getDefaultConfig()
+		err = nil
 	}
 
 	_ = flag.String("config", "./config.yaml", "Path to the configuration file (see configs/config.yaml) for an example")
