@@ -10,7 +10,7 @@ import (
 	"os"
 )
 
-// define available log levels
+// Level of the log message
 type Level uint8
 const (
 	LevelDebug	Level = iota
@@ -35,7 +35,6 @@ type Logger struct {
 var dLogger Logger
 
 func init() {
-
 	dLogger = Logger {
 		PrintLevel: LevelDebug,
 		LogLevel: LevelInfo,
@@ -52,7 +51,7 @@ func (l Logger) Log(level Level, message string, parameters ...any) {
 }
 
 func (l Logger) log(level Level, message string, parameters ...any) {
-	pc, file, line, ok := runtime.Caller(2)
+	pc, file, line, ok := runtime.Caller(3)
 	if (!ok) {
 		file = "#unknown"
 		line = 0
@@ -110,6 +109,7 @@ func getSourceMessage(file string, line int, pc uintptr, l Logger) (string) {
 }
 
 func (l *Logger) setup() {
+	// log.Ldate|log.Ltime|log.Lshortfile
 	l.consoleLogger = log.New(os.Stdout, "", 0)
 	l.consoleLoggerErr = log.New(os.Stderr, "", 0)
 
@@ -131,10 +131,10 @@ func (l *Logger) setup() {
 }
 
 func (l *Logger) CloseFile() {
-	if (dLogger.logFile != nil) {
-		dLogger.logFile.Close()
-		dLogger.logFile = nil
-		dLogger.fileLogger = nil
+	if (l.logFile != nil) {
+		l.logFile.Close()
+		l.logFile = nil
+		l.fileLogger = nil
 	}
 }
 
@@ -142,6 +142,9 @@ func (l *Logger) CloseFile() {
 func SetGlobalLogger(l *Logger) {
 	dLogger = *l
 	dLogger.setup()
+}
+func GetGlobalLogger() (*Logger) {
+	return &dLogger
 }
 
 func Debug(message string, parameters ...any) {
@@ -162,4 +165,23 @@ func Fatal(message string, parameters ...any) {
 
 func CloseFile() {
 	dLogger.CloseFile()
+}
+
+// Tries to convert the given level name to the corresponding level code.
+// Allowed values are: 'debug', 'info', 'warn', 'warning', 'error', 'panic' and 'fatal'
+// If an incorrect level name was given an warning is logged and info will be returned
+func GetLevelByName(levelName string) Level {
+	levelName = strings.ToLower(levelName)
+	switch (levelName) {
+		case "debug": return LevelDebug
+		case "info": return LevelInfo
+		case "warn", "warning": return LevelWarning
+		case "error": return LevelError
+		case "panic", "fatal": return LevelFatal
+
+		default: {
+			Warning("Unable to parse the level name '%s'. Expected 'debug', 'info', 'warn', 'error' or 'fatal'", levelName)
+			return LevelInfo
+		}
+	}
 }

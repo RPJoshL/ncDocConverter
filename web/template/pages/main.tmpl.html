@@ -1,0 +1,12 @@
+{{define "main"}}
+  <div id="root"></div>
+
+  {{template "vitejs" .}}
+  
+  <script type="module" src='{{ getJSFile "main"}}'></script>
+  {{if not .ServerConfig.Development}}
+    <link rel="stylesheet" href="assets/main.css">
+  {{end}}
+  
+  
+{{end}}

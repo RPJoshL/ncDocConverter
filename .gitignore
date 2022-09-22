@@ -21,3 +21,11 @@
 # Go workspace file
 go.work
 
+# Locally used configuration file
+/config.yaml
+
+# Vite build file
+/.vite
+
+# Log files
+*.log
