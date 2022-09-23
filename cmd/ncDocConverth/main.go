@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"rpjosh.de/ncDocConverter/internal/models"
+	"rpjosh.de/ncDocConverter/internal/ncworker"
 	"rpjosh.de/ncDocConverter/pkg/logger"
 )
 
@@ -50,6 +51,16 @@ func main() {
 		WriteTimeout: 10 * time.Second,
 	}
 
+	ncConvertUsers, err := models.ParseConvertUsers("./ncConverter.json")
+	if err != nil {
+		logger.Error("Unable to parse the file %s: %s", "dd", err)
+	}
+	ncworker.NewScheduler(ncConvertUsers)
+
+	if 1 == 1 {
+		return
+	}
+	
 	logger.Info("Server started on %s", config.Server.Address)
 	var errw error
 	if config.Server.Certificate == "" {

@@ -12,3 +12,6 @@ var DevelopeFiles embed.FS
 
 //go:embed "template"
 var TemplateFiles embed.FS
+
+//go:embed "apitemplate"
+var ApiTemplateFiles embed.FS

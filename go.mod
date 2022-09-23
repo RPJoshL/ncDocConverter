@@ -11,3 +11,4 @@ require (
 )
 
 // https://zhwt.github.io/yaml-to-go/
+// https://www.onlinetool.io/xmltogo/

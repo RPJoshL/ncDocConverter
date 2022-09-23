@@ -27,7 +27,7 @@ type Logging struct {
 }
 
 // Parses the given configuration file (.yaml file) to an WebConfiguration
-func ParseConfig(webConfig *WebConfig, file string) (*WebConfig, error) {
+func ParseWebConfig(webConfig *WebConfig, file string) (*WebConfig, error) {
 	if file == "" {
 		return webConfig, nil
 	}
@@ -68,7 +68,7 @@ func SetConfig() (*WebConfig, error) {
 		}
 	}
 	webConfig := getDefaultConfig()
-	webConfig, err := ParseConfig(webConfig, configPath)
+	webConfig, err := ParseWebConfig(webConfig, configPath)
 	if err != nil {
 		logger.Error("Unable to parse the configuration file '%s': %s", configPath, err)
 		webConfig = getDefaultConfig()

@@ -23,6 +23,7 @@ go.work
 
 # Locally used configuration file
 /config.yaml
+/ncConverter.json
 
 # Vite build file
 /.vite

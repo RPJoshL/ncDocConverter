@@ -12,6 +12,7 @@ type User struct {
 	NextcloudBaseUrl	string`json:"nextcloudUrl"`
 	Username			string`json:"username"`
 	Password			string`json:"password"`
+	ConvertJobs			[]ConvertJob`json:"jobs"`
 }
 
 type ConvertJob struct {
@@ -23,14 +24,14 @@ type ConvertJob struct {
 	Executions			[]string`json:"execution"`
 }
 
-type NcConverter struct {
+type NcConvertUsers struct {
 	Users				[]User`json:"users"`
 }
 
 // Parses the given file to the in memory struct
-func ParseUsers(filePath string) (*NcConverter, error) {
+func ParseConvertUsers(filePath string) (*NcConvertUsers, error) {
 
-	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE, 0644)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open the file '%s': %s", filePath, err)
 	}
@@ -41,7 +42,7 @@ func ParseUsers(filePath string) (*NcConverter, error) {
 		return nil, fmt.Errorf("failed to parse 'ncConverter.json': %s", err)
 	}
 
-	var conv NcConverter
+	var conv NcConvertUsers
 
 	json.Unmarshal(byteValue, &conv)
 

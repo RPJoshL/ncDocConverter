@@ -1,7 +1,0 @@
-package ncworker
-
-
-
-func scheduleExecutions() {
-
-}
