@@ -10,5 +10,6 @@ if "%~1"=="-FIXED_CTRL_C" (
    GOTO :EOF
 )
 
+SET PATH=%PATH%;C:\Windows\System32
 set GOTMPDIR=C:\MYCOMP
-nodemon --delay 1s -e go,html --ignore web/app/ --exec go run ./cmd/ncDocConverth --signal SIGTERM
+nodemon --delay 1s -e go,html --ignore web/app/ --signal SIGKILL --exec go run ./cmd/ncDocConverth || exit 1

@@ -2,10 +2,11 @@ package ncworker
 
 import (
 	"fmt"
+	"io"
 	"net/http"
-	"net/url"
 	"path/filepath"
-	"strconv"
+	"strings"
+	"sync"
 	"time"
 
 	"rpjosh.de/ncDocConverter/internal/models"
@@ -19,13 +20,9 @@ type convertJob struct {
 	ncUser *models.NextcloudUser
 }
 
-type ncFiles struct {
-	extension    string
-	path         string
-	lastModified time.Time
-	contentType  string
-	size         int
-	fileid       int
+type convertQueu struct {
+	source      nextcloud.NcFile
+	destination string
 }
 
 func NewNcJob(job *models.NcConvertJob, ncUser *models.NextcloudUser) *convertJob {
@@ -40,7 +37,7 @@ func NewNcJob(job *models.NcConvertJob, ncUser *models.NextcloudUser) *convertJo
 func (job *convertJob) ExecuteJob() {
 
 	// Get existing directory contents
-	source, err := nextcloud.SearchInDirectory(
+	sourceFolder, err := nextcloud.SearchInDirectory(
 		job.ncUser,
 		job.job.SourceDir,
 		[]string{
@@ -53,7 +50,7 @@ func (job *convertJob) ExecuteJob() {
 		return
 	}
 
-	destination, err := nextcloud.SearchInDirectory(
+	destinationFolder, err := nextcloud.SearchInDirectory(
 		job.ncUser,
 		job.job.DestinationDir,
 		[]string{
@@ -65,83 +62,89 @@ func (job *convertJob) ExecuteJob() {
 		return
 	}
 
-	preCount := len("/remote.php/dav/files/" + job.ncUser.Username + "/")
-	// Store the files in a map
-	sourceMap := make(map[string]ncFiles)
-	destinationMap := make(map[string]ncFiles)
+	// Store all files in a map
+	prefix := "/remote.php/dav/files/" + job.ncUser.Username + "/"
+	sourceMap := nextcloud.ParseSearchResult(sourceFolder, prefix, job.job.SourceDir)
+	destinationMap := nextcloud.ParseSearchResult(destinationFolder, prefix, job.job.DestinationDir)
 
-	for _, file := range source.Response {
-		href, _ := url.QueryUnescape(file.Href)
-		path := href[preCount:]
-		var extension = filepath.Ext(path)
-		var name = path[0 : len(path)-len(extension)][len(job.job.SourceDir):]
-		time := file.GetLastModified()
-		size, err := strconv.Atoi(file.Propstat.Prop.Size)
-		if err != nil {
-			logger.Error("%s", err)
-		}
-		sourceMap[name] = ncFiles{
-			extension:    extension,
-			path:         path,
-			lastModified: time,
-			size:         size,
-			contentType:  file.Propstat.Prop.Getcontenttype,
-			fileid:       file.Propstat.Prop.Fileid,
-		}
-	}
+	// check which files should be converted
+	var filesToConvert []convertQueu
+	var directorys []string
 
-	for _, file := range destination.Response {
-		href, _ := url.QueryUnescape(file.Href)
-		path := href[preCount:]
-		var extension = filepath.Ext(path)
-		var name = path[0 : len(path)-len(extension)][len(job.job.DestinationDir):]
-
-		time, err := time.Parse("Mon, 02 Jan 2006 15:04:05 GMT", file.Propstat.Prop.Getlastmodified)
-		if err != nil {
-			logger.Error("%s", err)
-		}
-		size, err := strconv.Atoi(file.Propstat.Prop.Size)
-		if err != nil {
-			logger.Error("%s", err)
-		}
-		destinationMap[name] = ncFiles{
-			extension:    extension,
-			path:         path,
-			lastModified: time,
-			size:         size,
-			contentType:  file.Propstat.Prop.Getcontenttype,
-			fileid:       file.Propstat.Prop.Fileid,
-		}
-	}
-
-	convertCount := 0
 	for index, source := range sourceMap {
-		// check if the file exists in the destination map
+		// Check if the file exists in the destination map
 		if dest, exists := destinationMap[index]; exists {
-			// compare timestamp and size
-			if dest.lastModified.Before(source.lastModified) {
-				job.convertFile(source.path, source.fileid, dest.path)
-				convertCount++
+			// Compare timestamp and size
+			if dest.LastModified.Before(source.LastModified) {
+				filesToConvert = append(filesToConvert, convertQueu{source: source, destination: dest.Path})
 			}
 			delete(destinationMap, index)
 		} else {
-			job.convertFile(
-				source.path, source.fileid, job.getDestinationDir(source.path),
-			)
-			convertCount++
+			// the directory could not be existing -> check for existance
+			destinationDir := job.getDestinationDir(source.Path)
+			appendIfNotExists(&directorys, destinationDir[0:strings.LastIndex(destinationDir, "/")+1])
+
+			filesToConvert = append(filesToConvert, convertQueu{source: source, destination: destinationDir})
+
 			delete(destinationMap, index)
 		}
 	}
 
+	var wg sync.WaitGroup
+
 	// Delete the files which are not available anymore
+	wg.Add(len(destinationMap))
 	for _, dest := range destinationMap {
-		err := nextcloud.DeleteFile(job.ncUser, dest.path)
-		if err != nil {
-			logger.Error(utils.FirstCharToUppercase(err.Error()))
+		go func(file *nextcloud.NcFile) {
+			err := nextcloud.DeleteFile(job.ncUser, dest.Path)
+			if err != nil {
+				logger.Error(utils.FirstCharToUppercase(err.Error()))
+			}
+			wg.Done()
+		}(&dest)
+	}
+	wg.Wait()
+
+	// Create required directorys
+	wg.Add(len(directorys))
+	for _, dest := range directorys {
+		go func(path string) {
+			nextcloud.CreateFoldersRecursively(job.ncUser, path)
+			wg.Done()
+		}(dest)
+	}
+	wg.Wait()
+
+	// Convert the files
+	wg.Add(len(filesToConvert))
+	for _, file := range filesToConvert {
+		logger.Info("Path: %s", file.source.Path)
+		go func(cvt convertQueu) {
+			job.convertFile(cvt.source.Path, cvt.source.Fileid, cvt.destination)
+			wg.Done()
+		}(file)
+	}
+	wg.Wait()
+
+	logger.Info("Finished Nextcloud job \"%s\": %d documents converted", job.job.JobName, len(filesToConvert))
+}
+
+// Appends the directory to the array if it isn't contained
+// by another element already
+func appendIfNotExists(dirs *[]string, directory string) {
+	directoryLength := len(directory)
+	for i, currentDir := range *dirs {
+		currentLength := len(currentDir)
+
+		// the existing directory is already referenced in the current
+		if directoryLength > currentLength && directory[0:currentLength] == currentDir {
+			(*dirs)[i] = directory
+			continue
+		} else if directoryLength <= currentLength && currentDir[0:directoryLength] == directory {
+			continue
 		}
 	}
-
-	logger.Info("Finished Nextcloud job \"%s\": %d documents converted", job.job.JobName, convertCount)
+	*dirs = append(*dirs, directory)
 }
 
 func (job *convertJob) getDestinationDir(sourceFile string) string {
@@ -154,9 +157,7 @@ func (job *convertJob) getDestinationDir(sourceFile string) string {
 
 // Converts the source file to the destination file utilizing the onlyoffice convert api
 func (job *convertJob) convertFile(sourceFile string, sourceid int, destinationFile string) {
-	logger.Debug("Trying to convert %s (%d) to %s", sourceFile, sourceid, destinationFile)
-
-	nextcloud.CreateFoldersRecursively(job.ncUser, destinationFile)
+	logger.Debug("Converting %s (%d) to %s", sourceFile, sourceid, destinationFile)
 
 	client := http.Client{Timeout: 10 * time.Second}
 	req, err := http.NewRequest(http.MethodGet, job.ncUser.NextcloudBaseUrl+"/apps/onlyoffice/downloadas", nil)
@@ -172,10 +173,16 @@ func (job *convertJob) convertFile(sourceFile string, sourceid int, destinationF
 
 	res, err := client.Do(req)
 	if err != nil {
-		logger.Error("%s", err)
+		logger.Error("Failed to access the convert api: %s", err)
+		return
 	}
-	// Status Code 200
 	defer res.Body.Close()
+
+	if res.StatusCode != 200 {
+		body, _ := io.ReadAll(res.Body)
+		logger.Error("Failed to access the convert api (#%d). Do you have OnlyOffice installed?: %s", res.StatusCode, body)
+		return
+	}
 
 	uploadClient := http.Client{Timeout: 10 * time.Second}
 	uploadReq, err := http.NewRequest(http.MethodPut, job.ncUser.NextcloudBaseUrl+"/remote.php/dav/files/"+job.ncUser.Username+"/"+destinationFile, res.Body)

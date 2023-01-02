@@ -7,8 +7,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
-	"path/filepath"
 	"regexp"
 	"strings"
 	"sync"
@@ -108,21 +106,8 @@ func (job *BsJob) ExecuteJob() {
 	}
 
 	// Make a map with path as index
-	destinationMap := make(map[string]ncFiles)
-
-	preCount := len("/remote.php/dav/files/" + job.ncUser.Username + "/")
-	for _, file := range destination.Response {
-		href, _ := url.QueryUnescape(file.Href)
-		path := href[preCount:]
-		var extension = filepath.Ext(path)
-		var name = path[0 : len(path)-len(extension)][len(job.job.DestinationDir):]
-
-		destinationMap[name] = ncFiles{
-			extension:    extension,
-			path:         path,
-			lastModified: file.GetLastModified(),
-		}
-	}
+	prefix := "/remote.php/dav/files/" + job.ncUser.Username + "/"
+	destinationMap := nextcloud.ParseSearchResult(destination, prefix, job.job.DestinationDir)
 
 	// Check for cache
 	job.cache()
@@ -163,7 +148,7 @@ func (job *BsJob) ExecuteJob() {
 		// check if it has to be converted again (updated) or for the first time
 		des, exists := destinationMap[i]
 
-		if (!exists || b.lastModified.After(des.lastModified)) && !b.ignore {
+		if (!exists || b.lastModified.After(des.LastModified)) && !b.ignore {
 			wg.Add(1)
 			convertCount++
 			go func(book book, path string) {
@@ -187,7 +172,7 @@ func (job *BsJob) ExecuteJob() {
 			// check if it has to be converted again (updated) or for the first time
 			des, exists := destinationMap[b.Name]
 
-			if !b.converted && !b.ignore && (!exists || b.lastModified.After(des.lastModified)) {
+			if !b.converted && !b.ignore && (!exists || b.lastModified.After(des.LastModified)) {
 				wg.Add(1)
 				convertCount++
 				go func(book book, path string) {
@@ -202,7 +187,7 @@ func (job *BsJob) ExecuteJob() {
 
 	// Delete the files which are not available anymore
 	for _, dest := range destinationMap {
-		err := nextcloud.DeleteFile(job.ncUser, dest.path)
+		err := nextcloud.DeleteFile(job.ncUser, dest.Path)
 		if err != nil {
 			logger.Error(utils.FirstCharToUppercase(err.Error()))
 		}

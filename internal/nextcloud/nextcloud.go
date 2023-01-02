@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"path/filepath"
+	"strconv"
 	"strings"
 	"text/template"
 	"time"
@@ -14,6 +17,22 @@ import (
 	"rpjosh.de/ncDocConverter/pkg/logger"
 	"rpjosh.de/ncDocConverter/web"
 )
+
+// The internal representation of a nextcloud file
+type NcFile struct {
+	// File extension: txt
+	Extension string
+	// Relative path of the file to the nextcloud root: /folder/file.txt
+	Path         string
+	LastModified time.Time
+	ContentType  string
+	// Size in Bytes
+	Size int
+	// The unique file ID of the nextcloud server
+	Fileid int
+	// The Webdav URL for file reference
+	WebdavURL string
+}
 
 type searchTemplateData struct {
 	Username    string
@@ -104,6 +123,13 @@ func SearchInDirectory(ncUser *models.NextcloudUser, directory string, contentTy
 		return nil, err
 	}
 
+	// Create folder if not existing
+	if res.StatusCode == 404 {
+		logger.Info("Creating directory '%s' because it does not exist", "/"+directory)
+		CreateFoldersRecursively(ncUser, "/"+directory+"notExisting.pdf")
+		return &searchResult{}, nil
+	}
+
 	if res.StatusCode != 207 {
 		return nil, fmt.Errorf("status code %d: %s", res.StatusCode, resBody)
 	}
@@ -114,6 +140,40 @@ func SearchInDirectory(ncUser *models.NextcloudUser, directory string, contentTy
 	}
 
 	return &result, nil
+}
+
+// Parses the response from the given search format to an NcFile.
+// A map with the relative path based on the source Directory ("someFolder/file.txt")
+// and the mathing NcFile will be returned. Therefore, also the source Directory has to be given.
+//
+// To determine the path without the prefix "/remote.php/dav/user/" it has to be given.
+func ParseSearchResult(result *searchResult, prefix string, sourceDir string) map[string]NcFile {
+	preCount := len(prefix)
+	rtc := make(map[string]NcFile)
+
+	for _, file := range result.Response {
+		href, _ := url.QueryUnescape(file.Href)
+		path := href[preCount:]
+		var extension = filepath.Ext(path)
+		var name = path[0 : len(path)-len(extension)][len(sourceDir):]
+		time := file.GetLastModified()
+		size, err := strconv.Atoi(file.Propstat.Prop.Size)
+		if err != nil {
+			logger.Error("Failed to parse the file size '%s' to an integer: %s", file.Propstat.Prop.Size, err)
+			continue
+		}
+		rtc[name] = NcFile{
+			Extension:    extension,
+			Path:         path,
+			LastModified: time,
+			Size:         size,
+			ContentType:  file.Propstat.Prop.Getcontenttype,
+			Fileid:       file.Propstat.Prop.Fileid,
+			WebdavURL:    file.Href,
+		}
+	}
+
+	return rtc
 }
 
 // Delets a file with the given path.
@@ -154,7 +214,7 @@ func CreateFoldersRecursively(ncUser *models.NextcloudUser, destinationFile stri
 		}
 
 		if res.StatusCode != 201 && res.StatusCode != 405 {
-			logger.Error("Failed to create directorys")
+			logger.Error("Failed to create directory '%s'", folderTree)
 		}
 	}
 }
