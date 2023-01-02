@@ -1,0 +1,21 @@
+{
+    "users": [
+        {
+            "authUser":         "Unique Username (from ",
+            "nextcloudUrl":     "https://cloud.myDomain.de",
+            "username":         "MyUsername",
+            "password":         "App Password",
+    
+            "jobs": [
+                {
+                    "jobName":          "",
+                    "sourceDir":        "Arbeit/",
+                    "destinationDir":   "Ebooks/",
+                    "keepFolders":      true,
+                    "recursive":        true,
+                    "execution":        [ "01:00", "15:00" ]
+                }
+            ]
+        }
+    ]
+}

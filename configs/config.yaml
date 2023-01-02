@@ -1,0 +1,19 @@
+server:
+  # Address to listen on
+  address: ":4000"
+
+  # Path to the folder with the certificates file (cert.pem and key.pem) for using TLS
+  certificate: "/etc/letsencrypt/live/"
+
+  # If this parameter is given, all jobs are executed immediately after starting the program.
+  # Afterward the program does exit -> The "execution" field in the jobs are going to be ignored
+  oneShot: false
+
+logging:
+  # Minimum log Level for printing to the console (debug, info, warning, error, fatal)
+  printLogLevel: info
+  # Minimum log level for writing into the log file (debug, info, warning, error, fatal)
+  writeLogLevel: warning
+
+  # File path to log (empty = disabled)
+  logFilePath: "/home/myUser/logs/ncDocConverter.live"

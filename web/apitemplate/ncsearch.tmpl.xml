@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<d:searchrequest xmlns:d="DAV:" xmlns:oc="http://owncloud.org/ns">
+    <d:basicsearch>
+        <d:select>
+            <d:prop>
+                <d:getcontenttype/>
+                <d:getlastmodified/>
+                <oc:size/>
+                <oc:fileid/>
+            </d:prop>
+        </d:select>
+        <d:from>
+            <d:scope>
+                <d:href>/files/{{.Username}}/{{.Directory}}</d:href>
+                <d:depth></d:depth>
+            </d:scope>
+        </d:from>
+        <d:where>
+            <d:and>
+                <d:or>
+                    {{range .ContentType}}
+                        <d:eq>
+                            <d:prop>
+                                <d:getcontenttype/>
+                            </d:prop>
+                            <d:literal>{{ . }}</d:literal>
+                        </d:eq>
+                    {{end}}
+                </d:or>
+                    <d:gt>
+                        <d:prop>
+                            <oc:size/>
+                        </d:prop>
+                        <d:literal>100</d:literal>
+                    </d:gt>
+            </d:and>
+        </d:where>
+        <d:orderby/>
+    </d:basicsearch>
+</d:searchrequest>
