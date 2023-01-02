@@ -55,12 +55,12 @@ func main() {
 	if err != nil {
 		logger.Error("Unable to parse the file %s: %s", "dd", err)
 	}
-	ncworker.NewScheduler(ncConvertUsers)
+	ncworker.NewScheduler(ncConvertUsers, config)
 
 	if 1 == 1 {
 		return
 	}
-	
+
 	logger.Info("Server started on %s", config.Server.Address)
 	var errw error
 	if config.Server.Certificate == "" {

@@ -1,13 +1,3 @@
-## Projekt anlegen
-
-npm init vite@latest ui -- --template react-ts
-cd ui
-npm install
-
-cd ..
-go get 
-
-
 ## Ausführen
 
 set GOTMPDIR=C:\MYCOMP

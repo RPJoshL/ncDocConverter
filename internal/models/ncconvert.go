@@ -7,25 +7,32 @@ import (
 	"os"
 )
 
-type User struct {
-	AuthUser			string`json:"authUser"`
-	NextcloudBaseUrl	string`json:"nextcloudUrl"`
-	Username			string`json:"username"`
-	Password			string`json:"password"`
-	ConvertJobs			[]ConvertJob`json:"jobs"`
+// The root nextcloud user where the files are stored
+// and the files for onlyoffice jobs are defined
+type NextcloudUser struct {
+	NextcloudBaseUrl string `json:"nextcloudUrl"`
+	Username         string `json:"username"`
+	Password         string `json:"password"`
+
+	// OnlyOffice
+	ConvertJobs []NcConvertJob `json:"jobs"`
+
+	// BookStack
+	BookStack BookStack `json:"bookStack"`
 }
 
-type ConvertJob struct {
-	JobName				string`json:"jobName"`
-	SourceDir			string`json:"sourceDir"`
-	DestinationDir		string`json:"destinationDir"`
-	KeepFolders			string`json:"keepFolders"`
-	Recursive			string`json:"recursive"`
-	Executions			[]string`json:"execution"`
+// A OnlyOffice docs convert job
+type NcConvertJob struct {
+	JobName        string `json:"jobName"`
+	SourceDir      string `json:"sourceDir"`
+	DestinationDir string `json:"destinationDir"`
+	KeepFolders    string `json:"keepFolders"`
+	Recursive      string `json:"recursive"`
+	Execution      string `json:"execution"`
 }
 
 type NcConvertUsers struct {
-	Users				[]User`json:"users"`
+	Users []NextcloudUser `json:"nextcloudUsers"`
 }
 
 // Parses the given file to the in memory struct

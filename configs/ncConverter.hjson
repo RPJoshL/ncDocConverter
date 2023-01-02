@@ -1,0 +1,78 @@
+{
+    "nextcloudUsers": [
+        {
+            // Nextcloud user and instance to save the converted files
+            "nextcloudUrl": "https://cloud.rpjosh.de",
+            "username":     "exchange",
+            "password":     "Zj9cQ-eF3n6-R6DSt-8sJXf-kYseJ",
+    
+            // OnlyOffice (docx, xlsx, ...) convertion to pdf
+            "jobs": [
+                {
+                    "jobName":          "Convert my books",
+                    "sourceDir":        "api/",
+                    "destinationDir":   "ebooks/",
+
+                    // Keep folders of source
+                    // Otherwise all files will be saved in the destination dir
+                    "keepFolders":      true,
+
+                    // If the folder should be searched recursive
+                    "recursive":        true,
+                    
+                    // Execution date in the cron format
+                    "execution":        "45 23 * * 6"
+                }
+            ],
+            
+            // Conversion from bookStack to pdf/html
+            "bookStack": {
+                "url":          "https://wiki.rpjosh.de",
+                "username":     "test@rpjosh.de",
+                "apiToken":     "typCf2LoSQDHicpeeAZQCDZwAq7BvVdl:PcKMZVDrIwEJeKIKyaD7w0cf20JCjpZz",
+
+                "jobs": [
+                    {
+                        "jobName":  "Convert my favorite books",
+                        
+                        // Shelves to filter -> convert only shelves with the names "Work" and "Linux" 
+                        // Leave empty to convert books in all shelves
+                        "shelves": [ "Work", "Linux" ],
+                        // Regex to filter after the shelv name
+                        "shelveRegex": "",
+
+                        // Books to filter (see shelves for more informations)
+                        "books": [],
+                        "booksRegex": "",
+
+                        // If books which doesn't belong to an shelf should also be converted.
+                        // The will be placed in the root folder.
+                        // Note that the field "shelves" and "shelveRegex" doesn't work as expected
+                        // (Books inside this shelve won't be excluded but will be placed in the root)
+                        "includeBooksWithoutShelve": false,
+
+                        // Destination folder to save the converted documents in nextcloud
+                        "destinationDir": "ebooks/wiki/",
+
+                        // Export format (html or pdf)
+                        "format": "html",
+
+                        // If the books should be saved inside the shelves folder
+                        // Otherwise all files will be saved in the destination dir
+                        "keepStructure": true,
+
+                        // Execution date in the cron format
+                        "execution": "45 23 * * 6",
+
+                        // The fetching of books and shelves can be ressource hungry. This value specifies the number
+                        // of jobs that are executed with cached data.
+                        // Note that new or deleted books and shelves won't be converted until the cache counter
+                        // expires. Changes in existing books will still be noted.
+                        // Specify zero to disable the cache
+                        "cache": 3
+                    }
+                ]
+            }
+        }
+    ]
+}

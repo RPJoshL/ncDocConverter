@@ -14,10 +14,9 @@ type WebConfig struct {
 }
 
 type Server struct {
-	Address               string `yaml:"address"`
-	Certificate           string `yaml:"certificate"`
-	DevelopmentServer     bool   `yaml:"developmentServer"`
-	DevelopmentServerPort int    `yaml:"developmentServerPort"`
+	Address     string `yaml:"address"`
+	Certificate string `yaml:"certificate"`
+	OneShot     bool   `yaml:"oneShot"`
 }
 
 type Logging struct {
@@ -26,7 +25,7 @@ type Logging struct {
 	LogFilePath   string `yaml:"logFilePath"`
 }
 
-// Parses the given configuration file (.yaml file) to an WebConfiguration
+// Parses the configuration file (.yaml file) to an WebConfiguration
 func ParseWebConfig(webConfig *WebConfig, file string) (*WebConfig, error) {
 	if file == "" {
 		return webConfig, nil
@@ -47,8 +46,7 @@ func ParseWebConfig(webConfig *WebConfig, file string) (*WebConfig, error) {
 func getDefaultConfig() *WebConfig {
 	return &WebConfig{
 		Server: Server{
-			Address:               ":4000",
-			DevelopmentServerPort: 5173,
+			Address: ":4000",
 		},
 		Logging: Logging{
 			PrintLogLevel: "info",
@@ -78,12 +76,12 @@ func SetConfig() (*WebConfig, error) {
 	_ = flag.String("config", "./config.yaml", "Path to the configuration file (see configs/config.yaml) for an example")
 	address := flag.String("address", webConfig.Server.Address, "Address and port on which the api and the web server should listen to")
 	printLogLevel := flag.String("printLogLevel", webConfig.Logging.PrintLogLevel, "Minimum log level to log (debug, info, warning, error, fatal)")
-	devServer := flag.Bool("dev", webConfig.Server.DevelopmentServer, "Enables the development server with hot reload support")
+	oneShot := flag.Bool("oneShot", webConfig.Server.OneShot, "All jobs are executed immediately and the program exists afterwards")
 
 	flag.Parse()
 	webConfig.Server.Address = *address
 	webConfig.Logging.PrintLogLevel = *printLogLevel
-	webConfig.Server.DevelopmentServer = *devServer
+	webConfig.Server.OneShot = *oneShot
 
 	defaultLogger := logger.Logger{
 		PrintLevel:  logger.GetLevelByName(webConfig.Logging.PrintLogLevel),

@@ -1,13 +1,13 @@
 server:
+  # Address to listen on
   address: ":4000"
 
   # Path to the folder with the certificates file (cert.pem and key.pem) for using TLS
   certificate: "/etc/letsencrypt/live/"
 
-  # Enables the development server with hot reload function (spans a vite server)
-  developmentServer: false
-  # Port on which the development server should listen to
-  developmentServerPort: 5173
+  # If this parameter is given, all jobs are executed immediately after starting the program.
+  # Afterward the program does exit -> The "execution" field in the jobs are going to be ignored
+  oneShot: false
 
 logging:
   # Minimum log Level for printing to the console (debug, info, warning, error, fatal)
