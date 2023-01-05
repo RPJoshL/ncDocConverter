@@ -1,21 +1,46 @@
 {
-    "users": [
+    "nextcloudUsers": [
         {
-            "authUser":         "Unique Username (from ",
-            "nextcloudUrl":     "https://cloud.myDomain.de",
-            "username":         "MyUsername",
-            "password":         "App Password",
+            "nextcloudUrl": "https://cloud.myDomain.de",
+            "username":     "myUser",
+            "password":     "A41cP-eR3n6-OIP13-8sQ1f-kYqp3",
     
             "jobs": [
                 {
-                    "jobName":          "",
-                    "sourceDir":        "Arbeit/",
-                    "destinationDir":   "Ebooks/",
+                    "jobName":          "Convert my books",
+                    "sourceDir":        "api/",
+                    "destinationDir":   "ebooks/",
+
                     "keepFolders":      true,
                     "recursive":        true,
-                    "execution":        [ "01:00", "15:00" ]
+                    "execution":        "45 23 * * 6"
                 }
-            ]
+            ],
+            
+            "bookStack": {
+                "url":          "https://wiki.myDomain.de",
+                "username":     "test@myDomain.de",
+                "apiToken":     "typfe29famd983amdk12a93:ave550l3fqu72cays51o84da71fvlqvtia6x19wZz",
+
+                "jobs": [
+                    {
+                        "jobName":  "Convert my favorite books",
+                        
+                        "shelves": [ "Work", "Linux" ],
+                        "shelveRegex": "",
+
+                        "books": [],
+                        "booksRegex": "",
+
+                        "includeBooksWithoutShelve": false,
+                        "destinationDir": "ebooks/wiki/",
+                        "format": "html",
+                        "keepStructure": true,
+                        "execution": "45 23 * * 6",
+                        "cache": 3
+                    }
+                ]
+            }
         }
     ]
 }

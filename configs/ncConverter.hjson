@@ -1,10 +1,12 @@
+// NOTE: This is not a valid JSON file.
+// Remove all comments and rename the file from '.hjson' to '.json'
 {
     "nextcloudUsers": [
         {
             // Nextcloud user and instance to save the converted files
-            "nextcloudUrl": "https://cloud.rpjosh.de",
-            "username":     "exchange",
-            "password":     "Zj9cQ-eF3n6-R6DSt-8sJXf-kYseJ",
+            "nextcloudUrl": "https://cloud.myDomain.de",
+            "username":     "myUser",
+            "password":     "A41cP-eR3n6-OIP13-8sQ1f-kYqp3",
     
             // OnlyOffice (docx, xlsx, ...) convertion to pdf
             "jobs": [
@@ -27,9 +29,9 @@
             
             // Conversion from bookStack to pdf/html
             "bookStack": {
-                "url":          "https://wiki.rpjosh.de",
+                "url":          "https://wiki.myDomain.de",
                 "username":     "test@rpjosh.de",
-                "apiToken":     "typCf2LoSQDHicpeeAZQCDZwAq7BvVdl:PcKMZVDrIwEJeKIKyaD7w0cf20JCjpZz",
+                "apiToken":     "typfe29famd983amdk12a93:ave550l3fqu72cays51o84da71fvlqvtia6x19wZz",
 
                 "jobs": [
                     {

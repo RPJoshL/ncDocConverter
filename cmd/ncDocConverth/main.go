@@ -10,6 +10,8 @@ import (
 	"rpjosh.de/ncDocConverter/pkg/logger"
 )
 
+var version string
+
 type WebApplication struct {
 	logger *logger.Logger
 	config *models.WebConfig
@@ -18,7 +20,7 @@ type WebApplication struct {
 func main() {
 	defer logger.CloseFile()
 
-	config, err := models.SetConfig()
+	config, err := models.SetConfig(version)
 	if err != nil {
 		logger.Error(err.Error())
 	}

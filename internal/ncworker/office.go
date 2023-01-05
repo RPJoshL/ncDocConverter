@@ -96,7 +96,7 @@ func (job *convertJob) ExecuteJob() {
 	wg.Add(len(destinationMap))
 	for _, dest := range destinationMap {
 		go func(file *nextcloud.NcFile) {
-			err := nextcloud.DeleteFile(job.ncUser, dest.Path)
+			err := nextcloud.DeleteFile(job.ncUser, file.Path)
 			if err != nil {
 				logger.Error(utils.FirstCharToUppercase(err.Error()))
 			}
@@ -118,7 +118,6 @@ func (job *convertJob) ExecuteJob() {
 	// Convert the files
 	wg.Add(len(filesToConvert))
 	for _, file := range filesToConvert {
-		logger.Info("Path: %s", file.source.Path)
 		go func(cvt convertQueu) {
 			job.convertFile(cvt.source.Path, cvt.source.Fileid, cvt.destination)
 			wg.Done()

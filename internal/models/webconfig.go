@@ -2,6 +2,7 @@ package models
 
 import (
 	"flag"
+	"fmt"
 	"os"
 
 	yaml "gopkg.in/yaml.v3"
@@ -17,6 +18,7 @@ type Server struct {
 	Address     string `yaml:"address"`
 	Certificate string `yaml:"certificate"`
 	OneShot     bool   `yaml:"oneShot"`
+	Version     string
 }
 
 type Logging struct {
@@ -56,7 +58,7 @@ func getDefaultConfig() *WebConfig {
 }
 
 // Applies the cli and the configuration options from the config files
-func SetConfig() (*WebConfig, error) {
+func SetConfig(version string) (*WebConfig, error) {
 	configPath := "./config.yaml"
 	// the path of the configuration file is needed first to determine the "default" values
 	for i, arg := range os.Args {
@@ -66,6 +68,8 @@ func SetConfig() (*WebConfig, error) {
 		}
 	}
 	webConfig := getDefaultConfig()
+	webConfig.Server.Version = version
+
 	webConfig, err := ParseWebConfig(webConfig, configPath)
 	if err != nil {
 		logger.Error("Unable to parse the configuration file '%s': %s", configPath, err)
@@ -77,11 +81,17 @@ func SetConfig() (*WebConfig, error) {
 	address := flag.String("address", webConfig.Server.Address, "Address and port on which the api and the web server should listen to")
 	printLogLevel := flag.String("printLogLevel", webConfig.Logging.PrintLogLevel, "Minimum log level to log (debug, info, warning, error, fatal)")
 	oneShot := flag.Bool("oneShot", webConfig.Server.OneShot, "All jobs are executed immediately and the program exists afterwards")
+	printVersion := flag.Bool("version", false, "Prints the version of the program")
 
 	flag.Parse()
 	webConfig.Server.Address = *address
 	webConfig.Logging.PrintLogLevel = *printLogLevel
 	webConfig.Server.OneShot = *oneShot
+
+	if *printVersion {
+		fmt.Println(webConfig.Server.Version)
+		os.Exit(0)
+	}
 
 	defaultLogger := logger.Logger{
 		PrintLevel:  logger.GetLevelByName(webConfig.Logging.PrintLogLevel),
