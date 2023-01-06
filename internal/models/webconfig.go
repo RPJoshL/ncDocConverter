@@ -18,6 +18,7 @@ type Server struct {
 	Address     string `yaml:"address"`
 	Certificate string `yaml:"certificate"`
 	OneShot     bool   `yaml:"oneShot"`
+	JobFile     string `yaml:"JobFile"`
 	Version     string
 }
 
@@ -49,6 +50,7 @@ func getDefaultConfig() *WebConfig {
 	return &WebConfig{
 		Server: Server{
 			Address: ":4000",
+			JobFile: "./ncConverter.json",
 		},
 		Logging: Logging{
 			PrintLogLevel: "info",

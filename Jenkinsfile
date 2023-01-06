@@ -27,9 +27,10 @@ pipeline {
         }
 
         stage('Deploy') {
-            when {
-                buildingTag()
-            }
+            // Tags not working with gitea?
+            //when {
+            //    buildingTag()
+            //}
 
             steps {
                 script {

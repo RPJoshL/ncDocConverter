@@ -87,7 +87,7 @@ func (s NcConvertScheduler) ScheduleExecutions() {
 
 		// Schedule Nextcloud jobs
 		for i, job := range user.ConvertJobs {
-			convJob := NewNcJob(&s.users.Users[ui].ConvertJobs[i], &s.users.Users[i])
+			convJob := NewNcJob(&s.users.Users[ui].ConvertJobs[i], &s.users.Users[ui])
 
 			_, err := s.scheduler.Cron(job.Execution).DoWithJobDetails(s.executeJob, convJob)
 			if err != nil {
@@ -98,7 +98,7 @@ func (s NcConvertScheduler) ScheduleExecutions() {
 		// Schedule boockstack jobs
 		if user.BookStack.URL != "" {
 			for i, job := range user.BookStack.Jobs {
-				bsJob := NewBsJob(&s.users.Users[ui].BookStack.Jobs[i], &s.users.Users[i])
+				bsJob := NewBsJob(&s.users.Users[ui].BookStack.Jobs[i], &s.users.Users[ui])
 
 				_, err := s.scheduler.Cron(job.Execution).DoWithJobDetails(s.executeJob, bsJob)
 				if err != nil {

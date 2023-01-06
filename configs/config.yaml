@@ -9,6 +9,9 @@ server:
   # Afterward the program does exit -> The "execution" field in the jobs are going to be ignored
   oneShot: false
 
+  # Location of the file with the job configurations 
+  JobFile: "./ncConverter.json"
+
 logging:
   # Minimum log Level for printing to the console (debug, info, warning, error, fatal)
   printLogLevel: info

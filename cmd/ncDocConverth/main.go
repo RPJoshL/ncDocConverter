@@ -53,13 +53,14 @@ func main() {
 		WriteTimeout: 10 * time.Second,
 	}
 
-	ncConvertUsers, err := models.ParseConvertUsers("./ncConverter.json")
+	ncConvertUsers, err := models.ParseConvertUsers(webApp.config.Server.JobFile)
 	if err != nil {
 		logger.Error("Unable to parse the file %s: %s", "dd", err)
 	}
 	ncworker.NewScheduler(ncConvertUsers, config)
 
 	if 1 == 1 {
+		// Webserver for BookStack hooks currently not implemented
 		return
 	}
 

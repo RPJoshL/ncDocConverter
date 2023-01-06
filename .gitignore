@@ -34,5 +34,5 @@ go.work
 # Build binaries
 /ncDocConverth-*
 
-# Note folder
+# Space for private notes 
 /notes
