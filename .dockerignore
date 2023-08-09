@@ -1,0 +1,10 @@
+**/.git
+ncDocConverth-*
+
+# Space for private notes 
+notes/
+
+# Locally used configuration file
+config.yaml
+ncConverter.json
+config-docker.yaml

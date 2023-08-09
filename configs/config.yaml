@@ -10,7 +10,7 @@ server:
   oneShot: false
 
   # Location of the file with the job configurations 
-  JobFile: "./ncConverter.json"
+  jobFile: "./ncConverter.json"
 
 logging:
   # Minimum log Level for printing to the console (debug, info, warning, error, fatal)

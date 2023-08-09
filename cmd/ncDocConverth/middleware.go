@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"runtime/debug"
 
+	"git.rpjosh.de/RPJosh/go-logger"
 	"github.com/justinas/nosurf"
-	"rpjosh.de/ncDocConverter/pkg/logger"
 )
 
 func secureHeaders(next http.Handler) http.Handler {

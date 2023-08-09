@@ -12,10 +12,10 @@ import (
 	"sync"
 	"time"
 
-	"rpjosh.de/ncDocConverter/internal/models"
-	"rpjosh.de/ncDocConverter/internal/nextcloud"
-	"rpjosh.de/ncDocConverter/pkg/logger"
-	"rpjosh.de/ncDocConverter/pkg/utils"
+	"git.rpjosh.de/RPJosh/go-logger"
+	"git.rpjosh.de/ncDocConverter/internal/models"
+	"git.rpjosh.de/ncDocConverter/internal/nextcloud"
+	"git.rpjosh.de/ncDocConverter/pkg/utils"
 )
 
 type BsJob struct {

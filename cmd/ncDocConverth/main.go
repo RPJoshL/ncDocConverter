@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"time"
 
-	"rpjosh.de/ncDocConverter/internal/models"
-	"rpjosh.de/ncDocConverter/internal/ncworker"
-	"rpjosh.de/ncDocConverter/pkg/logger"
+	"git.rpjosh.de/RPJosh/go-logger"
+	"git.rpjosh.de/ncDocConverter/internal/models"
+	"git.rpjosh.de/ncDocConverter/internal/ncworker"
 )
 
 var version string

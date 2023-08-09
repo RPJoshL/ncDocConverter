@@ -3,9 +3,9 @@ package main
 import (
 	"net/http"
 
+	"git.rpjosh.de/ncDocConverter/internal/api"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"rpjosh.de/ncDocConverter/internal/api"
 )
 
 func (app *WebApplication) routes() http.Handler {

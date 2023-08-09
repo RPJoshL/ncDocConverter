@@ -3,13 +3,13 @@ package api
 import (
 	"github.com/go-chi/chi/v5"
 
-	"rpjosh.de/ncDocConverter/internal/models"
-	"rpjosh.de/ncDocConverter/pkg/logger"
+	"git.rpjosh.de/RPJosh/go-logger"
+	"git.rpjosh.de/ncDocConverter/internal/models"
 )
 
 type Api struct {
-	Logger 	*logger.Logger
-	Config 	*models.WebConfig
+	Logger *logger.Logger
+	Config *models.WebConfig
 }
 
 func (api *Api) SetupServer(router *chi.Mux) {

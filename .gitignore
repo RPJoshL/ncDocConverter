@@ -24,6 +24,7 @@ go.work
 # Locally used configuration file
 /config.yaml
 /ncConverter.json
+/config-docker.yaml
 
 # Vite build file
 /.vite

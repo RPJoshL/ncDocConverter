@@ -10,6 +10,9 @@ if "%~1"=="-FIXED_CTRL_C" (
    GOTO :EOF
 )
 
-SET PATH=%PATH%;C:\Windows\System32
-set GOTMPDIR=C:\MYCOMP
-nodemon --delay 1s -e go,html --ignore web/app/ --signal SIGKILL --exec go run ./cmd/ncDocConverth || exit 1
+SET PATH=%PATH%;C:\Windows\System3
+
+set /p version=< VERSION
+
+.\web\app\node_modules\.bin\nodemon --delay 1s -e go,html,yaml --signal SIGKILL --ignore web/app/ --quiet ^
+--exec "echo [Restarting] && go run -ldflags ""-X main.version=%VERSION%"" ./cmd/ncDocConverth" -- %args% || "exit 1"

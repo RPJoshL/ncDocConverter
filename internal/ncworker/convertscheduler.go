@@ -8,9 +8,9 @@ import (
 	"sync"
 	"time"
 
+	"git.rpjosh.de/RPJosh/go-logger"
+	"git.rpjosh.de/ncDocConverter/internal/models"
 	"github.com/go-co-op/gocron"
-	"rpjosh.de/ncDocConverter/internal/models"
-	"rpjosh.de/ncDocConverter/pkg/logger"
 )
 
 type NcConvertScheduler struct {

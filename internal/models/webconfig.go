@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"os"
 
+	"git.rpjosh.de/RPJosh/go-logger"
+	"git.rpjosh.de/ncDocConverter/pkg/utils"
 	yaml "gopkg.in/yaml.v3"
-	"rpjosh.de/ncDocConverter/pkg/logger"
 )
 
 type WebConfig struct {
@@ -18,7 +19,7 @@ type Server struct {
 	Address     string `yaml:"address"`
 	Certificate string `yaml:"certificate"`
 	OneShot     bool   `yaml:"oneShot"`
-	JobFile     string `yaml:"JobFile"`
+	JobFile     string `yaml:"jobFile"`
 	Version     string
 }
 
@@ -50,7 +51,7 @@ func getDefaultConfig() *WebConfig {
 	return &WebConfig{
 		Server: Server{
 			Address: ":4000",
-			JobFile: "./ncConverter.json",
+			JobFile: utils.GetEnvString("DATA_FILE", "./ncConverter.json"),
 		},
 		Logging: Logging{
 			PrintLogLevel: "info",
@@ -95,13 +96,13 @@ func SetConfig(version string) (*WebConfig, error) {
 		os.Exit(0)
 	}
 
-	defaultLogger := logger.Logger{
+	defaultLogger := logger.GetLoggerFromEnv(&logger.Logger{
 		PrintLevel:  logger.GetLevelByName(webConfig.Logging.PrintLogLevel),
 		LogLevel:    logger.GetLevelByName(webConfig.Logging.WriteLogLevel),
 		LogFilePath: webConfig.Logging.LogFilePath,
 		PrintSource: true,
-	}
-	logger.SetGlobalLogger(&defaultLogger)
+	})
+	logger.SetGlobalLogger(defaultLogger)
 
 	return webConfig, err
 }

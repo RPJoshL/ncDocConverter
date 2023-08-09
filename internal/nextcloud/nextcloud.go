@@ -13,9 +13,9 @@ import (
 	"text/template"
 	"time"
 
-	"rpjosh.de/ncDocConverter/internal/models"
-	"rpjosh.de/ncDocConverter/pkg/logger"
-	"rpjosh.de/ncDocConverter/web"
+	"git.rpjosh.de/RPJosh/go-logger"
+	"git.rpjosh.de/ncDocConverter/internal/models"
+	"git.rpjosh.de/ncDocConverter/web"
 )
 
 // The internal representation of a nextcloud file

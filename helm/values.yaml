@@ -1,0 +1,30 @@
+# Overrides the full name of the chart
+fullnameOverride: ""
+
+# Limit provided ressources
+resources:
+  requests:
+    memory: "30Mi"
+    cpu: "20m"
+  limits:
+    memory: "60Mi"
+    cpu: "70m"
+
+
+image:
+  # Repository to download the image from
+  repository: git.rpjosh.de/rpjosh-container/ncDocConverter
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion
+  tag: ""
+
+# Secret to use during fetching the image
+imagePullSecrets: []
+
+# Configuration options for the app
+config:
+  # Minimum log level for printing to the console. Possible options are debug,info,warn,error
+  logLevel: info
+
+# The secret name with the 'ncConverter.json' file as 'data.json' entry
+dataSecret: ''
