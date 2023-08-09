@@ -20,7 +20,7 @@ spec:
       {{- end }}
       containers:
       - name: {{ include ".fullname" . }}
-        image: "{{ .Values.image.repository }}:{ .Values.image.tag | default .Chart.AppVersion }}"
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
 
         # Limit rights
@@ -30,14 +30,17 @@ spec:
           privileged: false
           readOnlyRootFilesystem: false
           runAsNonRoot: true
+          runAsUser: 1111
         
         volumeMounts:
         - name: config-volume
-          mountPath: /config/
+          mountPath: /config/config.yaml
           readOnly: true
+          subPath: config.yaml
         - name: secrets  
-          mountPath: /config/
+          mountPath: /config/data.json
           readOnly: true
+          subPath: data.json
 
         env:
           # Aggregator settings
