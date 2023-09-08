@@ -175,7 +175,6 @@ func (job *convertJob) convertFile(sourceFile string, sourceid int, destinationF
 		logger.Error("Failed to access the convert api: %s", err)
 		return
 	}
-	defer res.Body.Close()
 
 	if res.StatusCode != 200 {
 		body, _ := io.ReadAll(res.Body)
@@ -183,23 +182,9 @@ func (job *convertJob) convertFile(sourceFile string, sourceid int, destinationF
 		return
 	}
 
-	uploadClient := http.Client{Timeout: 10 * time.Second}
-	uploadReq, err := http.NewRequest(http.MethodPut, job.ncUser.NextcloudBaseUrl+"/remote.php/dav/files/"+job.ncUser.Username+"/"+destinationFile, res.Body)
-
-	if err != nil {
-		logger.Error("%s", err)
-	}
-	uploadReq.SetBasicAuth(job.ncUser.Username, job.ncUser.Password)
-	uploadReq.Header.Set("Content-Type", "application/binary")
-
-	res, err = uploadClient.Do(uploadReq)
-	if err != nil {
-		logger.Error("%s", err)
+	if err := nextcloud.UploadFile(job.ncUser, destinationFile, res.Body); err != nil {
+		logger.Error("Failed to upload file %q to nextcloud: %s", destinationFile, err)
 	}
 
-	if res.StatusCode != 204 && res.StatusCode != 201 {
-		logger.Error("Failed to create file %s (#%d)", destinationFile, res.StatusCode)
-	}
-	// Status Code 201
 	res.Body.Close()
 }

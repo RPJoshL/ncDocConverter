@@ -179,6 +179,9 @@ func ParseSearchResult(result *searchResult, prefix string, sourceDir string) ma
 // Delets a file with the given path.
 // The path has to start at the root level: Ebook/myFolder/file.txt
 func DeleteFile(ncUser *models.NextcloudUser, filePath string) error {
+	return deleteFile(ncUser, filePath, true)
+}
+func deleteFile(ncUser *models.NextcloudUser, filePath string, retry bool) error {
 	client := http.Client{Timeout: 5 * time.Second}
 
 	req := getRequest(http.MethodDelete, "files/"+ncUser.Username+"/"+filePath, nil, ncUser)
@@ -190,6 +193,13 @@ func DeleteFile(ncUser *models.NextcloudUser, filePath string) error {
 
 	if res.StatusCode != 204 {
 		return fmt.Errorf("failed to delete file %s (%d)", filePath, res.StatusCode)
+	}
+
+	// If the server is locked try to delete it again
+	if res.StatusCode == 423 && retry {
+		logger.Debug("Trying to delete the file again (it was locked previously)")
+		time.Sleep(10 * time.Millisecond)
+		return deleteFile(ncUser, filePath, false)
 	}
 
 	return nil
@@ -222,8 +232,12 @@ func CreateFoldersRecursively(ncUser *models.NextcloudUser, destinationFile stri
 // Uploads a file to the nextcloud server.
 // It will be saved to the destination as a relative path to the nextcloud root (ebook/file.txt).
 func UploadFile(ncUser *models.NextcloudUser, destination string, content io.ReadCloser) error {
-	client := http.Client{Timeout: 5 * time.Second}
-	req := getRequest(http.MethodPut, "files/"+ncUser.Username+"/"+destination, content, ncUser)
+	client := http.Client{Timeout: 10 * time.Second}
+	cnt, err := io.ReadAll(content)
+	if err != nil {
+		return fmt.Errorf("failed to read body: %s", err)
+	}
+	req := getRequest(http.MethodPut, "files/"+ncUser.Username+"/"+destination, bytes.NewBuffer(cnt), ncUser)
 
 	res, err := client.Do(req)
 	if err != nil {
